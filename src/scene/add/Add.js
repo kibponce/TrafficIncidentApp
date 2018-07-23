@@ -1,19 +1,35 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { StyleSheet, Text, View, TextInput, ScrollView, KeyboardAvoidingView } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import { mapStyle } from '../style/mapStyle';
+import { Button } from 'react-native-elements';
 
-export default class App extends React.Component {
+export default class Add extends Component {
     constructor() {
         super();
         this.state = {
             latitude: 8.48222,
             longitude: 124.64722,
             latitudeDelta: 0.0020,
-            longitudeDelta: 0.0020,
+            longitudeDelta: 0.0020, 
             title: "",
-            description: ""
+            description: "",
+            isSaveLoading: false
         };
+    }
+
+    componentDidMount() {
+        console.log(navigator)
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                console.log("dari")
+                this.setState({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude
+                });
+            },
+            (error) => { console.log("error getting location") }
+        );
     }
 
     render() {
@@ -52,7 +68,20 @@ export default class App extends React.Component {
                             numberOfLines = {5}
                             onChangeText={(description) => this.setState({description})}
                             value={this.state.description}
-                        />          
+                        />
+
+                        <Button 
+                            buttonStyle={{
+                                backgroundColor: "#ddd1af",
+                                width: 300,
+                                height: 45,
+                                borderColor: "transparent",
+                                borderWidth: 0,
+                                borderRadius: 5
+                            }}
+                            loading
+                            loadingProps={{ size: "large", color: "#fff" }}
+                            title="SAVE"/>     
                 </ScrollView>
             </KeyboardAvoidingView>
         );
@@ -68,9 +97,7 @@ const styles = StyleSheet.create({
         height: 180
     },
     formContainer: {
-        marginTop: 10,
-        marginLeft: 10,
-        marginRight: 10
+        margin: 10
     },
     multiline: {
         textAlignVertical: "top"

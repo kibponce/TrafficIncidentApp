@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import { mapStyle } from '../style/mapStyle';
 
-export default class App extends React.Component {
+export default class Map extends React.Component {
 
     render() {
         return (
