@@ -4,24 +4,7 @@
             "outputFile": "/Users/kevinponce/Desktop/TUTORIAL/Traffic/android/app/build/intermediates/incremental/mergeDebugResources/merged.dir/values-lt/values-lt.xml",
             "map": [
                 {
-                    "source": "/Users/kevinponce/.gradle/caches/transforms-1/files-1.1/appcompat-v7-23.0.1.aar/8bb0fcbe92b794d519e29eaabe335e10/res/values-lt/values-lt.xml",
-                    "from": {
-                        "startLines": "4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "280,396,504,627,728,841,928,1037,1158,1243,1352,1461,1561,1671,1775,1888,2018,2119",
-                        "endColumns": "115,107,122,100,112,86,108,120,84,108,108,99,109,103,112,129,100,100",
-                        "endOffsets": "391,499,622,723,836,923,1032,1153,1238,1347,1456,1556,1666,1770,1883,2013,2114,2215"
-                    },
-                    "to": {
-                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,36",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "105,221,329,452,553,666,753,862,983,1068,1177,1286,1386,1496,1600,1713,1843,4550",
-                        "endColumns": "115,107,122,100,112,86,108,120,84,108,108,99,109,103,112,129,100,100",
-                        "endOffsets": "216,324,447,548,661,748,857,978,1063,1172,1281,1381,1491,1595,1708,1838,1939,4646"
-                    }
-                },
-                {
-                    "source": "/Users/kevinponce/.gradle/caches/transforms-1/files-1.1/play-services-basement-10.0.1.aar/832da9a5a16db69947d9105958439be4/res/values-lt/values.xml",
+                    "source": "/Users/kevinponce/.gradle/caches/transforms-1/files-1.1/play-services-basement-10.0.1.aar/f8a71dcd6a7f4c5381f865d36d68f942/res/values-lt/values.xml",
                     "from": {
                         "startLines": "4",
                         "startColumns": "0",
@@ -38,7 +21,24 @@
                     }
                 },
                 {
-                    "source": "/Users/kevinponce/.gradle/caches/transforms-1/files-1.1/play-services-base-10.0.1.aar/8afdbf83acb49a05d97f71802547a648/res/values-lt/values.xml",
+                    "source": "/Users/kevinponce/.gradle/caches/transforms-1/files-1.1/appcompat-v7-23.0.1.aar/263001c4fdf1fc9c2e8ae2d053db1f07/res/values-lt/values-lt.xml",
+                    "from": {
+                        "startLines": "4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "280,396,504,627,728,841,928,1037,1158,1243,1352,1461,1561,1671,1775,1888,2018,2119",
+                        "endColumns": "115,107,122,100,112,86,108,120,84,108,108,99,109,103,112,129,100,100",
+                        "endOffsets": "391,499,622,723,836,923,1032,1153,1238,1347,1456,1556,1666,1770,1883,2013,2114,2215"
+                    },
+                    "to": {
+                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,36",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "105,221,329,452,553,666,753,862,983,1068,1177,1286,1386,1496,1600,1713,1843,4550",
+                        "endColumns": "115,107,122,100,112,86,108,120,84,108,108,99,109,103,112,129,100,100",
+                        "endOffsets": "216,324,447,548,661,748,857,978,1063,1172,1281,1381,1491,1595,1708,1838,1939,4646"
+                    }
+                },
+                {
+                    "source": "/Users/kevinponce/.gradle/caches/transforms-1/files-1.1/play-services-base-10.0.1.aar/2a4f06d7a0d43e8bb1fcb63b8026c87c/res/values-lt/values.xml",
                     "from": {
                         "startLines": "4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
                         "startColumns": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",

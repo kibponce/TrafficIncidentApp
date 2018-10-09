@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, TextInput, ScrollView, KeyboardAvoidingView } from 'react-native';
+import { StyleSheet, Text, View, TextInput, ScrollView, KeyboardAvoidingView, PermissionsAndroid } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import { mapStyle } from '../style/mapStyle';
 import { Button } from 'react-native-elements';
@@ -18,17 +18,39 @@ export default class Add extends Component {
         };
     }
 
+    async requestLocationPermission() {
+        try {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+            {
+              'title': 'App Location Permission',
+              'message': 'App needs to access your location'
+            }
+          )
+          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            console.log("You can use the location")
+          } else {
+            console.log("Location permission denied")
+          }
+        } catch (err) {
+          console.warn(err)
+        }
+      }
+
+    componentWillMount() {
+        this.requestLocationPermission();
+    }
+
     componentDidMount() {
-        console.log(navigator)
         navigator.geolocation.getCurrentPosition(
             (position) => {
-                console.log("dari")
+                console.log("position", position);
                 this.setState({
                     latitude: position.coords.latitude,
                     longitude: position.coords.longitude
                 });
             },
-            (error) => { console.log("error getting location") }
+            (error) => { console.log("error getting location", error) },
         );
     }
 

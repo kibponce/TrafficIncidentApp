@@ -4,7 +4,7 @@
             "outputFile": "/Users/kevinponce/Desktop/TUTORIAL/Traffic/android/app/build/intermediates/incremental/mergeDebugResources/merged.dir/values-w480dp-v13/values-w480dp-v13.xml",
             "map": [
                 {
-                    "source": "/Users/kevinponce/.gradle/caches/transforms-1/files-1.1/appcompat-v7-23.0.1.aar/8bb0fcbe92b794d519e29eaabe335e10/res/values-w480dp/values-w480dp.xml",
+                    "source": "/Users/kevinponce/.gradle/caches/transforms-1/files-1.1/appcompat-v7-23.0.1.aar/263001c4fdf1fc9c2e8ae2d053db1f07/res/values-w480dp/values-w480dp.xml",
                     "from": {
                         "startLines": "4,7",
                         "startColumns": "4,4",

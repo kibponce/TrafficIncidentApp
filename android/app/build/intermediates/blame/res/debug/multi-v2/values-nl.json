@@ -4,24 +4,7 @@
             "outputFile": "/Users/kevinponce/Desktop/TUTORIAL/Traffic/android/app/build/intermediates/incremental/mergeDebugResources/merged.dir/values-nl/values-nl.xml",
             "map": [
                 {
-                    "source": "/Users/kevinponce/.gradle/caches/transforms-1/files-1.1/appcompat-v7-23.0.1.aar/8bb0fcbe92b794d519e29eaabe335e10/res/values-nl/values-nl.xml",
-                    "from": {
-                        "startLines": "4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "280,398,506,629,734,841,927,1035,1155,1237,1348,1452,1551,1666,1779,1882,2000,2103",
-                        "endColumns": "117,107,122,104,106,85,107,119,81,110,103,98,114,112,102,117,102,100",
-                        "endOffsets": "393,501,624,729,836,922,1030,1150,1232,1343,1447,1546,1661,1774,1877,1995,2098,2199"
-                    },
-                    "to": {
-                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,36",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "105,223,331,454,559,666,752,860,980,1062,1173,1277,1376,1491,1604,1707,1825,4570",
-                        "endColumns": "117,107,122,104,106,85,107,119,81,110,103,98,114,112,102,117,102,100",
-                        "endOffsets": "218,326,449,554,661,747,855,975,1057,1168,1272,1371,1486,1599,1702,1820,1923,4666"
-                    }
-                },
-                {
-                    "source": "/Users/kevinponce/.gradle/caches/transforms-1/files-1.1/play-services-base-10.0.1.aar/8afdbf83acb49a05d97f71802547a648/res/values-nl/values.xml",
+                    "source": "/Users/kevinponce/.gradle/caches/transforms-1/files-1.1/play-services-base-10.0.1.aar/2a4f06d7a0d43e8bb1fcb63b8026c87c/res/values-nl/values.xml",
                     "from": {
                         "startLines": "4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
                         "startColumns": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
@@ -38,7 +21,24 @@
                     }
                 },
                 {
-                    "source": "/Users/kevinponce/.gradle/caches/transforms-1/files-1.1/play-services-basement-10.0.1.aar/832da9a5a16db69947d9105958439be4/res/values-nl/values.xml",
+                    "source": "/Users/kevinponce/.gradle/caches/transforms-1/files-1.1/appcompat-v7-23.0.1.aar/263001c4fdf1fc9c2e8ae2d053db1f07/res/values-nl/values-nl.xml",
+                    "from": {
+                        "startLines": "4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "280,398,506,629,734,841,927,1035,1155,1237,1348,1452,1551,1666,1779,1882,2000,2103",
+                        "endColumns": "117,107,122,104,106,85,107,119,81,110,103,98,114,112,102,117,102,100",
+                        "endOffsets": "393,501,624,729,836,922,1030,1150,1232,1343,1447,1546,1661,1774,1877,1995,2098,2199"
+                    },
+                    "to": {
+                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,36",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "105,223,331,454,559,666,752,860,980,1062,1173,1277,1376,1491,1604,1707,1825,4570",
+                        "endColumns": "117,107,122,104,106,85,107,119,81,110,103,98,114,112,102,117,102,100",
+                        "endOffsets": "218,326,449,554,661,747,855,975,1057,1168,1272,1371,1486,1599,1702,1820,1923,4666"
+                    }
+                },
+                {
+                    "source": "/Users/kevinponce/.gradle/caches/transforms-1/files-1.1/play-services-basement-10.0.1.aar/f8a71dcd6a7f4c5381f865d36d68f942/res/values-nl/values.xml",
                     "from": {
                         "startLines": "4",
                         "startColumns": "0",
