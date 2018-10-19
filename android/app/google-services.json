@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "136008335143",
+    "firebase_url": "https://trafficincidentapp.firebaseio.com",
+    "project_id": "trafficincidentapp",
+    "storage_bucket": "trafficincidentapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:136008335143:android:7eacfaeea7038c72",
+        "android_client_info": {
+          "package_name": "com.traffic"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "136008335143-fu8rar68ibd2kaugcq5l7mpk6jhgqr9r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCAsf0ikdgkeSsa6ZAHLNEFGnhvD12P_zU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

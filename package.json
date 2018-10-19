@@ -18,10 +18,13 @@
     "preset": "react-native"
   },
   "dependencies": {
+    "firebase": "^5.5.5",
+    "moment": "^2.22.2",
     "native-base": "^2.8.1",
     "react": "16.3.1",
     "react-native": "^0.55.2",
     "react-native-elements": "^0.19.1",
+    "react-native-firebase": "^4.3.8",
     "react-native-maps": "^0.21.0",
     "react-native-vector-icons": "^4.6.0",
     "react-navigation": "^2.9.1"
