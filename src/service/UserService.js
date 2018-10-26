@@ -9,6 +9,10 @@ class UserService {
     add(doc) {
        return this.ref.add(doc);
     }
+
+    getByEmail(email) {
+        return this.ref.where('email', '==', email).get()
+    }
 }
 
 export default userService = new UserService();

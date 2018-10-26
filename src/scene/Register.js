@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
 import { StyleSheet, 
          Text, 
-         View, 
-         KeyboardAvoidingView,
-         ScrollView } from 'react-native';
-import { Container, Content, Form, Item, Input, Button, Label, DatePicker, Spinner} from 'native-base';
+         View } from 'react-native';
+import { Container, Content, Form, Item, Input, Button, Label, DatePicker, Spinner, Separator, Toast} from 'native-base';
 import firebase from 'react-native-firebase';
 import moment from 'moment';
 
@@ -21,22 +19,25 @@ export default class RegisterScene extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            email: null,
+            password: null,
+            confirmPassword: null,
             // Form variables
             firstName: null,
             lastName: null,
             address: null,
             birthdate: new Date(),
             phoneNumber: null,
-            email: null,
             occupation: null,
 
             // State
-            registrationProgress: false
+            registrationProgress: false,
+
+            errorMessage: null,
+            successMessage: null
         }
 
         this.setDate = this.setDate.bind(this);
-
-        this.ref = firebase.firestore().collection('incidents');
     }
 
     render() {
@@ -46,10 +47,43 @@ export default class RegisterScene extends Component {
             )
         }
 
+        let error, success = null;
+        if(this.state.errorMessage) {
+            error = <View style={styles.error}>
+                        <Text style={styles.notifMessage}>{this.state.errorMessage}</Text>
+                    </View>;
+        }
+
+        if(this.state.successMessage) {
+            success = <View style={styles.success}>
+                        <Text style={styles.notifMessage}>{this.state.successMessage}</Text>
+                    </View>;
+        }
+
         return(
             <Container style={Styles.appContainer}>
+                {error}
+                {success}
                 <Content>
                     <Form>
+                        <Separator bordered>
+                            <Text>Access</Text>
+                        </Separator>
+                        <Item>
+                            <Label style={styles.label}>Email Address</Label>
+                            <Input value={this.state.email} onChangeText={this.onChangeText.bind(this, "email")}/>
+                        </Item>
+                        <Item>
+                            <Label style={styles.label}>Password</Label>
+                            <Input value={this.state.password} secureTextEntry={true} onChangeText={this.onChangeText.bind(this, "password")}/>
+                        </Item>
+                        <Item>
+                            <Label style={styles.label}>Confirm Password</Label>
+                            <Input value={this.state.confirmPassword} secureTextEntry={true} onChangeText={this.onChangeText.bind(this, "confirmPassword")}/>
+                        </Item>
+                        <Separator bordered>
+                            <Text>Details</Text>
+                        </Separator>
                         <Item>
                             <Label style={styles.label}>First name</Label>
                             <Input value={this.state.firstName} onChangeText={this.onChangeText.bind(this, "firstName")}/>
@@ -84,10 +118,6 @@ export default class RegisterScene extends Component {
                             <Input value={this.state.phoneNumber} onChangeText={this.onChangeText.bind(this, "phoneNumber")}/>
                         </Item>
                         <Item>
-                            <Label style={styles.label}>Email Address</Label>
-                            <Input value={this.state.email} onChangeText={this.onChangeText.bind(this, "email")}/>
-                        </Item>
-                        <Item>
                             <Label style={styles.label}>Occupation</Label>
                             <Input value={this.state.occupation} onChangeText={this.onChangeText.bind(this, "occupation")}/>
                         </Item>
@@ -99,7 +129,7 @@ export default class RegisterScene extends Component {
                     </Form>
                 </Content>
             </Container>
-        )
+        );
     }
 
     setDate(newDate) {
@@ -119,35 +149,65 @@ export default class RegisterScene extends Component {
     }
 
     onSubmit() {
+        this.validatePassword();
+
         this.setState({
             registrationProgress: true
         });
 
-        UserService.add({
-            firstName: this.state.firstName,
-            lastName: this.state.lastName,
-            address: this.state.address,
-            birthdate: this.getDate(),
-            phoneNumber: this.state.phoneNumber,
-            email: this.state.email,
-            occupation: this.state.occupation
-        }).then(() => {
-            this.setState({
-                firstName: null,
-                lastName: null,
-                address: null,
-                birthdate: new Date(),
-                phoneNumber: null,
-                email: null,
-                occupation: null,
+        this.validatePassword()
+            .then(() => {
+                return firebase.auth().createUserAndRetrieveDataWithEmailAndPassword(this.state.email, this.state.password)
+            })
+            .then(() => {
+                return UserService.add({
+                    firstName: this.state.firstName,
+                    lastName: this.state.lastName,
+                    address: this.state.address,
+                    birthdate: this.getDate(),
+                    phoneNumber: this.state.phoneNumber,
+                    email: this.state.email,
+                    occupation: this.state.occupation,
+                    isConfirmed: false
+                })
+            })
+            .then(() => {
+                return this.setState({
+                    email: null,
+                    password: null,
+                    confirmPassword: null,
 
-                // Submit process is done
-                registrationProgress: false
+                    firstName: null,
+                    lastName: null,
+                    address: null,
+                    birthdate: new Date(),
+                    phoneNumber: null,
+                    occupation: null,
+
+                    // Submit process is done
+                    registrationProgress: false,
+                    errorMessage: null,
+                    successMessage: 'Registration Successful'
+
+                });
+            })
+            .catch(error => {
+                console.log(error.message);
+                //error
+                this.setState({
+                    errorMessage: error.message,
+                    registrationProgress: false
+                });
             });
-        }).catch((error) => {
-            //error
-            console.log(error);
-        });
+    }
+
+    validatePassword() {
+        if(this.state.password == this.state.confirmPassword) {
+            return Promise.resolve();
+        } else {
+            const reason = new Error("Password did not match");
+            return Promise.reject(reason);
+        }
     }
 }
 
@@ -162,5 +222,14 @@ const styles = StyleSheet.create({
     label: {
         fontWeight: '600',
         color: '#aba6a6'
+    },
+    success: {
+        backgroundColor: 'green',
+    },
+    error: {
+        backgroundColor: 'red',
+    },
+    notifMessage: {
+        color: 'white'
     }
 });

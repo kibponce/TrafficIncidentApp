@@ -13,7 +13,7 @@ const tabNavigation = createBottomTabNavigator({
             tabBarLabel: "Incidents",
             tabBarIcon: ({ tintColor }) => {
                 return <Ionicons name="warning" size={24} color={tintColor} />
-            }
+            },
         }
     },
     Add: {

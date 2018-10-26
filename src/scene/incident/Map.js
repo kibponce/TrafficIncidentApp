@@ -4,7 +4,10 @@ import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import { mapStyle } from '../style/mapStyle';
 
 export default class Map extends React.Component {
-
+    static navigationOptions = {
+        header: null
+    }
+    
     render() {
         return (
         <View style={styles.container}>

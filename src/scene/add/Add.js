@@ -5,6 +5,10 @@ import { mapStyle } from '../style/mapStyle';
 import { Button } from 'react-native-elements';
 
 export default class Add extends Component {
+    static navigationOptions = {
+        header: null
+    }
+    
     constructor() {
         super();
         this.state = {
