@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet, 
          Text, 
-         View, 
-         KeyboardAvoidingView} from 'react-native';
+         View } from 'react-native';
 import { Container, Content, Form, Item, Input, Button, Label} from 'native-base';
 import firebase from 'react-native-firebase';
 
@@ -20,19 +19,19 @@ export default class LoginScene extends Component {
 
         this.state = {
             username: null,
-            password: null
+            password: null,
+
+            errorMessage: null
         }
     }
 
-    componentDidMount() {
-        // firebase
-        //     .auth()
-        //     .onAuthStateChanged(user => {
-        //         return this.props.navigation.navigate('TabNavigation');
-        //     })
-    }
-
     render() {
+        let errorMessage;
+        if(this.state.errorMessage) {
+            errorMessage = <View style={styles.errorView}>
+                                <Text style={styles.errorText}> {this.state.errorMessage} </Text>
+                            </View>;
+        }
         return(
             <Container style={Styles.appContainer}>
                 <View style={styles.header}>
@@ -40,6 +39,7 @@ export default class LoginScene extends Component {
                 </View>
                 <Content>
                     <Form style={styles.form}>
+                        {errorMessage}
                         <Item floatingLabel>
                             <Label>Email</Label>
                             <Input value={this.state.email} onChangeText={this.onChangeText.bind(this, "email")}/>
@@ -67,20 +67,44 @@ export default class LoginScene extends Component {
 
     handleLogin() {
         let { email, password } = this.state;
-        UserService.getByEmail(email)
-                    .then((doc) => {
-                        console.log(doc);
-                    })
-        // firebase
-        //     .auth()
-        //     .signInAndRetrieveDataWithEmailAndPassword(email, password)
-        //     .then(() => {
-        //         return this.props.navigation.navigate('TabNavigation');
-        //     })
-        //     .catch(error => {
-        //         console.log(error.message);
-        //     })
-            
+        try {
+            UserService.getByEmail(email)
+                .then((snapshot) => {
+                    if(snapshot.docs.length > 0) {
+                        let data = snapshot.docs[0].data();
+                        if(data.isConfirm) {
+                            return this.doAuth(email, password);
+                        } else {
+                            throw new Error("User is not confirmed");     
+                        }
+                    } else {
+                        throw new Error("Can't find user");
+                    }
+                })
+                .catch(error => {
+                    console.log(error)
+                    this.setState({
+                        errorMessage: error.message
+                    });
+                })
+        } catch (error) {
+            console.log(e);
+            this.setState({
+                errorMessage: error.message
+            });
+        }    
+    }
+
+    doAuth(email, password) {
+        return firebase
+                .auth()
+                .signInAndRetrieveDataWithEmailAndPassword(email, password)
+                .then(() => {
+                    return this.props.navigation.navigate('TabNavigation');
+                })
+                .catch(error => {
+                    return Promise.reject(error);
+                })
     }
 
     onChangeText(element, text) {
@@ -114,5 +138,13 @@ const styles = StyleSheet.create({
     registerLink: {
         textDecorationLine: 'underline',
         color: '#3759b4'
+    },
+    errorView: {
+        marginLeft: 15,
+        marginRight: 15
+    },
+    errorText: {
+        textAlign: 'center',
+        color: 'red'
     }
 });

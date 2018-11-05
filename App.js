@@ -3,7 +3,6 @@ import { StyleSheet, Text, View, YellowBox } from 'react-native';
 import { createStackNavigator } from 'react-navigation';
 
 //Navigations
-import TabNavigation from './src/navigation/TabNavigation';
 import LoginAndRegistrationStack from './src/navigation/LoginAndRegistrationStack';
 
 //Remove Warning on development
@@ -19,7 +18,6 @@ export default class App extends React.Component {
 
 const AppMainStackNavigator = createStackNavigator({
   LoginAndRegistrationStack: LoginAndRegistrationStack,
-  TabNav: TabNavigation,
 }, {
   headerMode : 'none',
   initialRouteName : 'LoginAndRegistrationStack'
