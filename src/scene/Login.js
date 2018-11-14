@@ -6,8 +6,8 @@ import { Container, Content, Form, Item, Input, Button, Label} from 'native-base
 import firebase from 'react-native-firebase';
 
 import UserService from '../service/UserService';
-import Styles from '../helpers/styles';
-
+import LocalStorage from '../service/LocalStorage';
+import Styles from '../helpers/styles'
 
 export default class LoginScene extends Component {
     static navigationOptions = {
@@ -18,12 +18,25 @@ export default class LoginScene extends Component {
         super(props);
 
         this.state = {
-            username: null,
+            email: null,
             password: null,
 
             errorMessage: null
         }
     }
+
+    componentDidMount() {
+        firebase
+            .auth()
+            .onAuthStateChanged(user => {
+                if(user == null) {
+                    return this.props.navigation.navigate('LoginScene');
+                } else {
+                    return this.props.navigation.navigate('IncidentScene');
+                }
+            })
+    }
+        
 
     render() {
         let errorMessage;
@@ -67,15 +80,18 @@ export default class LoginScene extends Component {
 
     handleLogin() {
         let { email, password } = this.state;
+        console.log(email);
         try {
             UserService.getByEmail(email)
                 .then((snapshot) => {
                     if(snapshot.docs.length > 0) {
                         let data = snapshot.docs[0].data();
                         if(data.isConfirm) {
+                           
+                            LocalStorage.setUserDetails(data);
                             return this.doAuth(email, password);
                         } else {
-                            throw new Error("User is not confirmed");     
+                            throw new Error("Your account it not yet confirmed");     
                         }
                     } else {
                         throw new Error("Can't find user");
@@ -100,7 +116,7 @@ export default class LoginScene extends Component {
                 .auth()
                 .signInAndRetrieveDataWithEmailAndPassword(email, password)
                 .then(() => {
-                    return this.props.navigation.navigate('TabNavigation');
+                    return this.props.navigation.navigate('IncidentScene');
                 })
                 .catch(error => {
                     return Promise.reject(error);
@@ -129,8 +145,7 @@ const styles = StyleSheet.create({
         fontWeight: '600'
     },
     form: {
-        marginTop: 10,
-        marginBottom: 10
+        margin: 10
     },
     textCenter: {
         textAlign: 'center'

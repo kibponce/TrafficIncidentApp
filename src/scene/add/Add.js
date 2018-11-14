@@ -1,24 +1,28 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, TextInput, ScrollView, KeyboardAvoidingView, PermissionsAndroid } from 'react-native';
+import { StyleSheet, View, TextInput, ScrollView, KeyboardAvoidingView, PermissionsAndroid } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
-import { mapStyle } from '../style/mapStyle';
-import { Button } from 'react-native-elements';
 
-export default class Add extends Component {
-    static navigationOptions = {
-        header: null
-    }
-    
+import ReportSerivce from '../../service/ReportService';
+
+import { CIVILIAN, TRAFFIC_ENFORCER } from '../../helpers/SenderEnum';
+import { mapStyle } from '../style/mapStyle';
+import { Button, Text } from 'native-base';
+import ReportService from '../../service/ReportService';
+import IncidentService from '../../service/IncidentService';
+import LocalStorage from '../../service/LocalStorage';
+
+export default class Add extends Component {   
     constructor() {
         super();
         this.state = {
-            latitude: 8.48222,
-            longitude: 124.64722,
+            latitude: 8.48222, // default
+            longitude: 124.64722, // default
             latitudeDelta: 0.0020,
             longitudeDelta: 0.0020, 
-            title: "",
-            description: "",
-            isSaveLoading: false
+            report: "",
+            isSaveLoading: false,
+
+            user: null
         };
     }
 
@@ -39,13 +43,14 @@ export default class Add extends Component {
         } catch (err) {
           console.warn(err)
         }
-      }
+    }
 
     componentWillMount() {
         this.requestLocationPermission();
     }
 
     componentDidMount() {
+        // Get current location of the device
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 console.log("position", position);
@@ -56,6 +61,15 @@ export default class Add extends Component {
             },
             (error) => { console.log("error getting location", error) },
         );
+
+        // Access user details from local storage
+        LocalStorage.getUserDetails()
+            .then(user => {
+                this.setState({user: JSON.parse(user)});
+            })
+            .catch(error => {
+                console.log(error);
+            })
     }
 
     render() {
@@ -82,35 +96,42 @@ export default class Add extends Component {
                 </View>
                 <ScrollView style={styles.formContainer}>
                         <TextInput 
-                            placeholder="Title" 
-                            onChangeText={(title) => this.setState({title})}
-                            value={this.state.title}
-                        />
-                        
-                        <TextInput 
                             style={styles.multiline}
-                            placeholder="Description" 
+                            placeholder="Report" 
                             multiline= {true}
                             numberOfLines = {5}
-                            onChangeText={(description) => this.setState({description})}
-                            value={this.state.description}
+                            onChangeText={(report) => this.setState({report})}
+                            value={this.state.report}
                         />
 
-                        <Button 
-                            buttonStyle={{
-                                backgroundColor: "#ddd1af",
-                                width: 300,
-                                height: 45,
-                                borderColor: "transparent",
-                                borderWidth: 0,
-                                borderRadius: 5
-                            }}
-                            loading
-                            loadingProps={{ size: "large", color: "#fff" }}
-                            title="SAVE"/>     
+                        <Button rounded danger block onPress={this.handleAddIncident.bind(this)}> 
+                            <Text>Send</Text>    
+                        </Button>     
                 </ScrollView>
             </KeyboardAvoidingView>
         );
+    }
+
+    handleAddIncident() {
+        let query = ReportService.add({
+            location: ReportSerivce.geopoint(this.state.latitude, this.state.longitude),
+            report: this.state.report,
+            sender: CIVILIAN,
+        });
+
+        if(this.state.user && this.state.user.isEnforcer) {
+            query = IncidentService.add({
+                location: ReportSerivce.geopoint(this.state.latitude, this.state.longitude),
+                report: this.state.report,
+                sender: TRAFFIC_ENFORCER,
+            });
+        }
+
+        query.then(() => {
+            console.log('success');
+        }).catch(error => {
+            console.log(error.message)
+        });
     }
 }
 

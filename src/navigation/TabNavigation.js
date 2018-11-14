@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { createBottomTabNavigator } from 'react-navigation';
-import Ionicons from 'react-native-vector-icons/MaterialIcons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 //Stacks
 import IncidentStack from './IncidentStack';
@@ -12,7 +12,7 @@ const tabNavigation = createBottomTabNavigator({
         navigationOptions: {
             tabBarLabel: "Incidents",
             tabBarIcon: ({ tintColor }) => {
-                return <Ionicons name="warning" size={24} color={tintColor} />
+                return <MaterialIcons name="warning" size={24} color={tintColor} />
             },
         }
     },
@@ -21,7 +21,7 @@ const tabNavigation = createBottomTabNavigator({
         navigationOptions: {
             tabBarLabel: "Add",
             tabBarIcon: ({ tintColor }) => {
-                return <Ionicons name="add-alert" size={24} color={tintColor} />
+                return <MaterialIcons name="add-alert" size={24} color={tintColor} />
             }
         }
     }

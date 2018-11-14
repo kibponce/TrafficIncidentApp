@@ -168,7 +168,7 @@ export default class RegisterScene extends Component {
                     phoneNumber: this.state.phoneNumber,
                     email: this.state.email,
                     occupation: this.state.occupation,
-                    isConfirmed: false
+                    isConfirmed: false,
                 })
             })
             .then(() => {

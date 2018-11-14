@@ -4,14 +4,16 @@ import { createStackNavigator } from 'react-navigation';
 //Scene
 import LoginScene from '../scene/Login';
 import RegisterScene from '../scene/Register';
-import TabNavigation from './TabNavigation';
+import IncidentScene from '../scene/incident/Map';
+import AddIncidentScene from '../scene/add/Add';
 
-const loginAndRegistrationStack = createStackNavigator({
+const AppNagivationStack = createStackNavigator({
     Login : LoginScene,
     Register: RegisterScene,
-    TabNavigation: TabNavigation
+    IncidentScene: IncidentScene,
+    AddIncidentScene: AddIncidentScene
 }, { 
     initialRouteName : 'Login'
 });
 
-export default loginAndRegistrationStack;
+export default AppNagivationStack;
