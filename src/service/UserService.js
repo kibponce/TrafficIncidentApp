@@ -4,6 +4,11 @@ class UserService {
     constructor() {
         // Create the collection in firestore
         this.ref = firebase.firestore().collection('user');
+        this.unsubscribeEnforcers = null;
+    }
+
+    geopoint(lat, long) {
+        return new firebase.firestore.GeoPoint(lat, long);
     }
 
     add(doc) {
@@ -12,6 +17,22 @@ class UserService {
 
     getByEmail(email) {
         return this.ref.where('email', '==', email).get()
+    }
+
+    getAllEnforcers() {
+        return this.ref.where('isEnforcer', '==', true).get()
+    }
+
+    onEnforcersSnapshot(collectionUpdate) {
+        this.unsubscribeEnforcers = this.ref.where('isEnforcer', '==', true).onSnapshot(collectionUpdate);    
+    }
+
+    unsubscribeEnforcers() {
+        this.unsubscribeEnforcers();
+    }
+
+    async updateLocation(id, data) {
+        await this.ref.doc(id).set(data);
     }
 }
 

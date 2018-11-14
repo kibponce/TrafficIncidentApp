@@ -85,10 +85,9 @@ export default class LoginScene extends Component {
             UserService.getByEmail(email)
                 .then((snapshot) => {
                     if(snapshot.docs.length > 0) {
-                        let data = snapshot.docs[0].data();
+                        let data = { ...snapshot.docs[0].data(), id: snapshot.docs[0].id };
                         if(data.isConfirm) {
-                           
-                            LocalStorage.setUserDetails(data);
+                           LocalStorage.setUserDetails(data);
                             return this.doAuth(email, password);
                         } else {
                             throw new Error("Your account it not yet confirmed");     

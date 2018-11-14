@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet, View, TextInput, ScrollView, KeyboardAvoidingView, PermissionsAndroid } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+import Geocoder from 'react-native-geocoder-reborn';
 
 import ReportSerivce from '../../service/ReportService';
 
@@ -11,17 +12,23 @@ import ReportService from '../../service/ReportService';
 import IncidentService from '../../service/IncidentService';
 import LocalStorage from '../../service/LocalStorage';
 
+
 export default class Add extends Component {   
+    static navigationOptions = {
+        title: 'Add'
+    };
+
     constructor() {
         super();
         this.state = {
-            latitude: 8.48222, // default
-            longitude: 124.64722, // default
+            latitude: null, // default
+            longitude: null, // default
             latitudeDelta: 0.0020,
             longitudeDelta: 0.0020, 
             report: "",
+            address: "",
             isSaveLoading: false,
-
+            
             user: null
         };
     }
@@ -54,6 +61,28 @@ export default class Add extends Component {
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 console.log("position", position);
+
+                let loc = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                }
+
+                // Now let's geocode the given current position to get the formatted address
+                Geocoder.geocodePosition(loc)
+                    .then(response => {
+                        console.log(response)
+                        if(response) {
+                            let data = response[0];
+
+                            this.setState({
+                                address: data.formattedAddress
+                            })
+                        }
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+
                 this.setState({
                     latitude: position.coords.latitude,
                     longitude: position.coords.longitude
@@ -73,6 +102,12 @@ export default class Add extends Component {
     }
 
     render() {
+        if(!this.state.latitude && !this.state.longitude) {
+            return <View>
+                        <Text>Fetching location..</Text>
+                   </View>
+        }
+
         return (
             <KeyboardAvoidingView style={styles.wrapper}>
                 <View style={styles.container}>
@@ -116,6 +151,7 @@ export default class Add extends Component {
         let query = ReportService.add({
             location: ReportSerivce.geopoint(this.state.latitude, this.state.longitude),
             report: this.state.report,
+            address: this.state.address,
             sender: CIVILIAN,
         });
 
@@ -129,6 +165,7 @@ export default class Add extends Component {
 
         query.then(() => {
             console.log('success');
+            this.props.navigation.pop();
         }).catch(error => {
             console.log(error.message)
         });

@@ -169,6 +169,8 @@ export default class RegisterScene extends Component {
                     email: this.state.email,
                     occupation: this.state.occupation,
                     isConfirmed: false,
+                    isEnforcer: false,
+                    location: null,
                 })
             })
             .then(() => {

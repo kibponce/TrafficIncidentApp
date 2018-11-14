@@ -10,6 +10,8 @@ target 'Traffic' do
   target 'Traffic-tvOSTests' do
     inherit! :search_paths
     # Pods for testing
+    pod 'react-native-geocoder', :path => '../node_modules/react-native-geocoder-reborn'
+
   end
 
   target 'TrafficTests' do
