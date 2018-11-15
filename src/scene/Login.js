@@ -23,12 +23,15 @@ export default class LoginScene extends Component {
 
             errorMessage: null
         }
+
+        this.unsubscribe = null;
     }
 
     componentDidMount() {
-        firebase
+        this.unsubscribe = firebase
             .auth()
             .onAuthStateChanged(user => {
+                console.log('AUTH STATE CHANGE', user)
                 if(user == null) {
                     return this.props.navigation.navigate('LoginScene');
                 } else {
@@ -37,6 +40,9 @@ export default class LoginScene extends Component {
             })
     }
         
+    componentWillUnmount() {
+        if (this.unsubscribe) this.unsubscribe();
+    }
 
     render() {
         let errorMessage;

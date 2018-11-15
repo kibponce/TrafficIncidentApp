@@ -2,14 +2,23 @@ import React, { Component } from 'react';
 import { StyleSheet, 
          Text, 
          View } from 'react-native';
-import { Container, Content, Form, Item, Input, Button, Label, DatePicker, Spinner, Separator, Toast} from 'native-base';
+import { Container, Content, Form, Item, Input, Button, Label, DatePicker, Spinner, Separator, Icon} from 'native-base';
 import firebase from 'react-native-firebase';
 import moment from 'moment';
+import ImagePicker from 'react-native-image-picker';
 
 import Styles from '../helpers/styles';
 
 import UserService from '../service/UserService';
+import StorageService from '../service/StorageService';
 
+const IMAGE_PICKER_OPTIONS = {
+    title: 'Upload picture',
+    storageOptions: {
+      skipBackup: true,
+      path: 'images',
+    },
+};
 
 export default class RegisterScene extends Component {
     static navigationOptions = {
@@ -29,6 +38,8 @@ export default class RegisterScene extends Component {
             birthdate: new Date(),
             phoneNumber: null,
             occupation: null,
+
+            image_uri: '',
 
             // State
             registrationProgress: false,
@@ -121,6 +132,14 @@ export default class RegisterScene extends Component {
                             <Label style={styles.label}>Occupation</Label>
                             <Input value={this.state.occupation} onChangeText={this.onChangeText.bind(this, "occupation")}/>
                         </Item>
+                        <Item>
+                            <Label style={styles.label}>Upload</Label>
+                            <Input disabled/>
+                            <Icon active name='camera' value={this.state.image_uri} onPress={this.uploadImage.bind(this)} />
+                        </Item>
+                        <View>
+
+                        </View>
                         <View>
                             <Button block rounded success onPress={this.onSubmit.bind(this)}>
                                 <Text style={Styles.appText}>Submit</Text>
@@ -142,6 +161,29 @@ export default class RegisterScene extends Component {
         return moment(this.state.birthdate).format('YYYY-MM-DD');
     }
 
+    uploadImage() {
+        ImagePicker.showImagePicker(IMAGE_PICKER_OPTIONS, (response) => {
+            console.log('Response = ', response);
+          
+            if (response.didCancel) {
+              console.log('User cancelled image picker');
+            } else if (response.error) {
+              console.log('ImagePicker Error: ', response.error);
+            }  else {
+              const source = { uri: response.uri };
+          
+              // You can also display the image using data:
+              // const source = { uri: 'data:image/jpeg;base64,' + response.data };
+              console.log(source);
+
+              this.setState({
+                image_uri: source.uri,
+              });
+
+            }
+        });
+    }
+
     onChangeText(element, text) {
         this.setState({
             [element] : text
@@ -149,8 +191,6 @@ export default class RegisterScene extends Component {
     }
 
     onSubmit() {
-        this.validatePassword();
-
         this.setState({
             registrationProgress: true
         });
@@ -158,6 +198,9 @@ export default class RegisterScene extends Component {
         this.validatePassword()
             .then(() => {
                 return firebase.auth().createUserAndRetrieveDataWithEmailAndPassword(this.state.email, this.state.password)
+            })
+            .then(() => {
+                return StorageService.uploadImage(this.state.image_uri)
             })
             .then(() => {
                 return UserService.add({
@@ -174,7 +217,11 @@ export default class RegisterScene extends Component {
                 })
             })
             .then(() => {
-                return this.setState({
+                console.log("Registeration successfull");
+
+                firebase.auth().signOut();
+
+                this.setState({
                     email: null,
                     password: null,
                     confirmPassword: null,
