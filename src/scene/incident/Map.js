@@ -59,17 +59,20 @@ export default class Map extends React.Component {
     }
 
     componentWillMount() {
-       this.getCurrentLocation();
+        this.getCurrentLocation();
     }
 
     componentDidMount() {
-        this.requestLocationPermission();
+      
+            this.requestLocationPermission();
+       
 
         UserService.onEnforcersSnapshot(this.onEnforcersCollectionUpdate)
         IncidentService.onSnapshot(this.onIncidentsCollectionUpdate);
         
         LocalStorage.getUserDetails()
             .then(user => {
+                console.log("LOCAL STORAGE DATA", user);
                 this.setState({user: JSON.parse(user)});
             })
             .catch(error => {
@@ -92,6 +95,13 @@ export default class Map extends React.Component {
                     latitude: position.coords.latitude,
                     longitude: position.coords.longitude
                 });
+            },
+            error => {
+                Alert.alert(
+                    error.message,
+                    'Please enable the device location'
+                )
+                console.log(error);
             }
         );
     }

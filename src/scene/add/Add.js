@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, View, TextInput, ScrollView, KeyboardAvoidingView, PermissionsAndroid } from 'react-native';
+import { Container, Icon, Form, Item, Input, Label, Textarea } from 'native-base';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import Geocoder from 'react-native-geocoder-reborn';
 
@@ -88,7 +89,13 @@ export default class Add extends Component {
                     longitude: position.coords.longitude
                 });
             },
-            (error) => { console.log("error getting location", error) },
+            (error) => { 
+                console.log("error getting location", error) 
+                Alert.alert(
+                    error.message,
+                    'Please enable the device location'
+                )
+            }
         );
 
         // Access user details from local storage
@@ -129,20 +136,32 @@ export default class Add extends Component {
                         </MapView.Marker>
                     </MapView>
                 </View>
-                <ScrollView style={styles.formContainer}>
-                        <TextInput 
-                            style={styles.multiline}
-                            placeholder="Report" 
-                            multiline= {true}
-                            numberOfLines = {5}
-                            onChangeText={(report) => this.setState({report})}
-                            value={this.state.report}
-                        />
+                <Container>
+                    <Form>
+                        <Item stackedLabel>
+                            <Label>Report</Label>
+                            <Textarea 
+                                style={styles.multiline}
+                                multiline= {true}
+                                numberOfLines = {5}
+                                onChangeText={(report) => this.setState({report})}
+                                value={this.state.report}
+                            />
+                        </Item>
+                        <Item>
+                            <Label>Upload Image</Label>
+                            <Input disabled />
+                            <Icon active name='camera' onPress={this.uploadImage.bind(this)} />
+                            <View style={styles.imageWrapper}>
 
+                            </View> 
+                        </Item>
+  
                         <Button rounded danger block onPress={this.handleAddIncident.bind(this)}> 
                             <Text>Send</Text>    
-                        </Button>     
-                </ScrollView>
+                        </Button>
+                    </Form>     
+                </Container>
             </KeyboardAvoidingView>
         );
     }
@@ -170,6 +189,10 @@ export default class Add extends Component {
             console.log(error.message)
         });
     }
+
+    uploadImage() {
+
+    }
 }
 
 const styles = StyleSheet.create({
@@ -184,7 +207,14 @@ const styles = StyleSheet.create({
         margin: 10
     },
     multiline: {
-        textAlignVertical: "top"
+        textAlignVertical: "top",
+        width: '100%'
     },
-    map: { ...StyleSheet.absoluteFillObject }
+    map: { ...StyleSheet.absoluteFillObject },
+    imageWrapper: {
+        margin: 10,
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'center',
+    }
 });

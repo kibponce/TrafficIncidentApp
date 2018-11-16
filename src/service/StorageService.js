@@ -15,12 +15,19 @@ class StorageService {
             .toString(16)
             .substring(1);
         }
-        return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+        return s4() + s4() + '-' + s4() + s4();
     }
 
-    uploadImage(uri, mime = 'application/octet-stream') {
+    uploadValidId(uri, mime = 'application/octet-stream') {
         return firebase.storage().
-                        ref('images').
+                        ref('valid_ids').
+                        child(this.guid()).
+                        put(uri, { contentType: mime })
+    }
+
+    uploadIncident(uri, mime = 'application/octet-stream') {
+        return firebase.storage().
+                        ref('incidents').
                         child(this.guid()).
                         put(uri, { contentType: mime })
     }

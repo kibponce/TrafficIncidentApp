@@ -23,25 +23,26 @@ export default class LoginScene extends Component {
 
             errorMessage: null
         }
-
-        this.unsubscribe = null;
     }
 
     componentDidMount() {
-        this.unsubscribe = firebase
-            .auth()
-            .onAuthStateChanged(user => {
-                console.log('AUTH STATE CHANGE', user)
+        console.log("COMPONENT DID MOUNT");
+        LocalStorage.getUserDetails()
+            .then(user => {
+                console.log(user);
                 if(user == null) {
                     return this.props.navigation.navigate('LoginScene');
                 } else {
                     return this.props.navigation.navigate('IncidentScene');
                 }
             })
+            .catch(error => {
+                console.log(error);
+            })
     }
         
     componentWillUnmount() {
-        if (this.unsubscribe) this.unsubscribe();
+        
     }
 
     render() {
@@ -76,7 +77,7 @@ export default class LoginScene extends Component {
 
                     <View style={styles.form}>
                         <Button transparent block info onPress={this.registerScene.bind(this)}>
-                            <Text style={styles.registerLink}>No account yet? Sign up</Text>
+                            <Text style={styles.registerLink}>Sign up</Text>
                         </Button>
                     </View>
                 </Content>
@@ -135,7 +136,7 @@ export default class LoginScene extends Component {
     }
 
     registerScene() {
-        return this.props.navigation.push('Register');
+        return this.props.navigation.navigate('Register');
     }
 }
 

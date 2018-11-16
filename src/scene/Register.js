@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { StyleSheet, 
          Text, 
-         View } from 'react-native';
+         View,
+         Image } from 'react-native';
 import { Container, Content, Form, Item, Input, Button, Label, DatePicker, Spinner, Separator, Icon} from 'native-base';
 import firebase from 'react-native-firebase';
 import moment from 'moment';
@@ -39,7 +40,7 @@ export default class RegisterScene extends Component {
             phoneNumber: null,
             occupation: null,
 
-            image_uri: '',
+            image_uri: null,
 
             // State
             registrationProgress: false,
@@ -52,10 +53,20 @@ export default class RegisterScene extends Component {
     }
 
     render() {
+        let imgUpload;
         if (this.state.registrationProgress) {
             return (
                 <Spinner color='green' />
             )
+        }
+
+        if (this.state.image_uri) {
+            imgUpload = <Image
+                    style={{width: '100%', height: 250}}
+                    source={{uri: this.state.image_uri}}
+                    resizeMode="contain" 
+                    resizeMethod="resize"
+                    />
         }
 
         let error, success = null;
@@ -133,12 +144,12 @@ export default class RegisterScene extends Component {
                             <Input value={this.state.occupation} onChangeText={this.onChangeText.bind(this, "occupation")}/>
                         </Item>
                         <Item>
-                            <Label style={styles.label}>Upload</Label>
-                            <Input disabled/>
-                            <Icon active name='camera' value={this.state.image_uri} onPress={this.uploadImage.bind(this)} />
+                            <Label style={styles.label}>Image</Label>
+                            <Input disabled />
+                            <Icon active name='camera' onPress={this.uploadImage.bind(this)} />
                         </Item>
-                        <View>
-
+                        <View style={styles.imageWrapper}>
+                            {imgUpload}
                         </View>
                         <View>
                             <Button block rounded success onPress={this.onSubmit.bind(this)}>
@@ -197,12 +208,16 @@ export default class RegisterScene extends Component {
 
         this.validatePassword()
             .then(() => {
+                console.log('CREATE EMAIL AND PASSWORD TO FIREBASE');
                 return firebase.auth().createUserAndRetrieveDataWithEmailAndPassword(this.state.email, this.state.password)
             })
             .then(() => {
-                return StorageService.uploadImage(this.state.image_uri)
+                console.log('UPLOAD IMAGE TO FIREBASE STORAGE');
+                return StorageService.uploadValidId(this.state.image_uri)
             })
-            .then(() => {
+            .then(uri => {
+                console.log('ADD CREDENTIALS TO FIREBASE DB');
+                console.log(uri)
                 return UserService.add({
                     firstName: this.state.firstName,
                     lastName: this.state.lastName,
@@ -211,14 +226,16 @@ export default class RegisterScene extends Component {
                     phoneNumber: this.state.phoneNumber,
                     email: this.state.email,
                     occupation: this.state.occupation,
-                    isConfirmed: false,
+                    isConfirm: false,
                     isEnforcer: false,
                     location: null,
+                    validIdUri: uri.downloadURL
                 })
             })
             .then(() => {
                 console.log("Registeration successfull");
-
+                
+                // HACK: Signout the created account since firebase automatically signed in after creation.
                 firebase.auth().signOut();
 
                 this.setState({
@@ -232,6 +249,7 @@ export default class RegisterScene extends Component {
                     birthdate: new Date(),
                     phoneNumber: null,
                     occupation: null,
+                    image_uri: null,
 
                     // Submit process is done
                     registrationProgress: false,
@@ -251,7 +269,16 @@ export default class RegisterScene extends Component {
     }
 
     validatePassword() {
-        if(this.state.password == this.state.confirmPassword) {
+        if(!this.state.email) {
+            const reason = new Error("Email is empty");
+            return Promise.reject(reason);
+        } else if(!this.state.password) {
+            const reason = new Error("Password is empty");
+            return Promise.reject(reason);
+        } else if(!this.state.confirmPassword) {
+            const reason = new Error("Confirm Password is empty");
+            return Promise.reject(reason);
+        } else if(this.state.password == this.state.confirmPassword) {
             return Promise.resolve();
         } else {
             const reason = new Error("Password did not match");
@@ -280,5 +307,11 @@ const styles = StyleSheet.create({
     },
     notifMessage: {
         color: 'white'
+    },
+    imageWrapper: {
+        margin: 10,
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'center',
     }
 });
