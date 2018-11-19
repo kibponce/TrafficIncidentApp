@@ -1,11 +1,11 @@
 import React from 'react';
 import { StyleSheet, View, PermissionsAndroid, Alert } from 'react-native';
-import MapView, { PROVIDER_GOOGLE, Circle, Marker, Icon } from 'react-native-maps';
+import MapView, { PROVIDER_GOOGLE, Circle, Marker} from 'react-native-maps';
 import firebase from 'react-native-firebase';
 
 // Styles
 import { mapStyle } from '../style/mapStyle';
-import { Button, Text } from 'native-base';
+import { Button, Text, Spinner } from 'native-base';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -39,34 +39,11 @@ export default class Map extends React.Component {
         this.mapRef = null;
     }
 
-    async requestLocationPermission() {
-        try {
-          const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-            {
-              'title': 'App Location Permission',
-              'message': 'App needs to access your location'
-            }
-          )
-          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-            console.log("You can use the location")
-          } else {
-            console.log("Location permission denied")
-          }
-        } catch (err) {
-          console.warn(err)
-        }
-    }
-
     componentWillMount() {
-        this.getCurrentLocation();
+        
     }
 
     componentDidMount() {
-      
-            this.requestLocationPermission();
-       
-
         UserService.onEnforcersSnapshot(this.onEnforcersCollectionUpdate)
         IncidentService.onSnapshot(this.onIncidentsCollectionUpdate);
         
@@ -74,10 +51,14 @@ export default class Map extends React.Component {
             .then(user => {
                 console.log("LOCAL STORAGE DATA", user);
                 this.setState({user: JSON.parse(user)});
+
+                this.getCurrentLocation();
             })
             .catch(error => {
                 console.log(error);
-            })
+            });
+
+        
     }
 
     componentWillUnmount() {
@@ -108,9 +89,8 @@ export default class Map extends React.Component {
 
     // display all incidents marker
     renderIncidentsMarker() {
-        let incidentsMarkers = [];
-        this.state.incidents.forEach(report => {
-            incidentsMarkers.push(
+        const incidentsMarkers = this.state.incidents.map(report => {
+            return (
                 <Marker
                 key={report.id}
                 pinColor={INCEDENTS_MARKER}
@@ -127,10 +107,10 @@ export default class Map extends React.Component {
     
     // display all enforcers marker
     renderEnforcersMarker() {
-        let enforcersMarker = [];
-        this.state.enforcers.forEach(enforcer => {
+        const enforcersMarker = this.state.enforcers.map(enforcer => {
             if(enforcer.location) {
-                enforcersMarker.push(
+                 
+                return (
                     <Marker
                     key={enforcer.id}
                     pinColor={ENFORCERS_MARKER}
@@ -167,6 +147,11 @@ export default class Map extends React.Component {
     }
 
     render() {
+        if(!this.state.latitude && !this.state.longitude && !this.state.user) {
+            return <Spinner color='green' />;
+            
+        }
+
         let user = this.state.user;
         let reportButton, debugCircle;
         if(user && user.isEnforcer) {
@@ -198,11 +183,13 @@ export default class Map extends React.Component {
                     latitudeDelta: 0.0955,
                     longitudeDelta: 0.0421,
                 }}
+                onUserLocationChange={this.handleLocationChange.bind(this)}
                 showsUserLocation
                 showsTraffic
+                followsUserLocation
                 >
                     {/* RENDER ENFORCERS */}
-                     {this.renderEnforcersMarker()}
+                    {this.renderEnforcersMarker()}
 
                     {/* RENDER INCIDENTS */}
                     {this.renderIncidentsMarker()}
@@ -222,13 +209,6 @@ export default class Map extends React.Component {
                 </MapView>
             </View>
         );
-    }
-
-    fetchReports() {
-        ReportService.get()
-            .then(docs => {
-                console.log(docs.docs);
-            })
     }
 
     handleAddIncident() {
@@ -261,6 +241,17 @@ export default class Map extends React.Component {
                 }},
             ]
         )
+    }
+
+    handleLocationChange(event) {
+        console.log("LOCATION CHANGED",event.nativeEvent.coordinate);
+        let myLocation = event.nativeEvent.coordinate;
+        if(myLocation.latitude && myLocation.longitude) {
+            this.setState({
+                latitude: myLocation.latitude,
+                longitude: myLocation.longitude
+            })
+        }
     }
 
     onEnforcersCollectionUpdate = (querySnapshot) => {

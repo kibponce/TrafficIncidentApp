@@ -31,8 +31,8 @@ class UserService {
         this.unsubscribeEnforcers();
     }
 
-    async updateLocation(id, data) {
-        await this.ref.doc(id).set(data);
+    updateLocation(id, data) {
+        this.ref.doc(id).set(data);
     }
 }
 

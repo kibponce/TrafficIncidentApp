@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { StyleSheet, 
          Text, 
-         View } from 'react-native';
-import { Container, Content, Form, Item, Input, Button, Label} from 'native-base';
+         View, PermissionsAndroid } from 'react-native';
+import { Container, Content, Form, Item, Input, Button, Label } from 'native-base';
 import firebase from 'react-native-firebase';
 
 import UserService from '../service/UserService';
@@ -26,7 +26,9 @@ export default class LoginScene extends Component {
     }
 
     componentDidMount() {
+        this.requestLocationPermission();
         console.log("COMPONENT DID MOUNT");
+        console.log(LocalStorage.getUserDetails());
         LocalStorage.getUserDetails()
             .then(user => {
                 console.log(user);
@@ -43,6 +45,25 @@ export default class LoginScene extends Component {
         
     componentWillUnmount() {
         
+    }
+
+    async requestLocationPermission() {
+        try {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+            {
+              'title': 'App Location Permission',
+              'message': 'App needs to access your location'
+            }
+          )
+          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            console.log("You can use the location")
+          } else {
+            console.log("Location permission denied")
+          }
+        } catch (err) {
+          console.warn(err)
+        }
     }
 
     render() {

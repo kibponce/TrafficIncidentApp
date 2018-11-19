@@ -217,7 +217,6 @@ export default class RegisterScene extends Component {
             })
             .then(uri => {
                 console.log('ADD CREDENTIALS TO FIREBASE DB');
-                console.log(uri)
                 return UserService.add({
                     firstName: this.state.firstName,
                     lastName: this.state.lastName,

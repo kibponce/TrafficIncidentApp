@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import { StyleSheet, View, TextInput, ScrollView, KeyboardAvoidingView, PermissionsAndroid } from 'react-native';
-import { Container, Icon, Form, Item, Input, Label, Textarea } from 'native-base';
-import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+import { StyleSheet, View, TextInput, ScrollView, KeyboardAvoidingView, PermissionsAndroid, Image } from 'react-native';
+import { Container, Icon, Form, Item, Input, Label, Textarea, Content } from 'native-base';
+import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import Geocoder from 'react-native-geocoder-reborn';
 
 import ReportSerivce from '../../service/ReportService';
@@ -12,7 +12,18 @@ import { Button, Text } from 'native-base';
 import ReportService from '../../service/ReportService';
 import IncidentService from '../../service/IncidentService';
 import LocalStorage from '../../service/LocalStorage';
+import StorageService from '../../service/StorageService';
 
+import ImagePicker from 'react-native-image-picker';
+
+
+const IMAGE_PICKER_OPTIONS = {
+    title: 'Upload picture',
+    storageOptions: {
+      skipBackup: true,
+      path: 'images',
+    },
+};
 
 export default class Add extends Component {   
     static navigationOptions = {
@@ -29,32 +40,14 @@ export default class Add extends Component {
             report: "",
             address: "",
             isSaveLoading: false,
+            image_uri: null,
             
             user: null
         };
     }
 
-    async requestLocationPermission() {
-        try {
-          const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-            {
-              'title': 'App Location Permission',
-              'message': 'App needs to access your location'
-            }
-          )
-          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-            console.log("You can use the location")
-          } else {
-            console.log("Location permission denied")
-          }
-        } catch (err) {
-          console.warn(err)
-        }
-    }
-
     componentWillMount() {
-        this.requestLocationPermission();
+
     }
 
     componentDidMount() {
@@ -63,26 +56,8 @@ export default class Add extends Component {
             (position) => {
                 console.log("position", position);
 
-                let loc = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                }
-
                 // Now let's geocode the given current position to get the formatted address
-                Geocoder.geocodePosition(loc)
-                    .then(response => {
-                        console.log(response)
-                        if(response) {
-                            let data = response[0];
-
-                            this.setState({
-                                address: data.formattedAddress
-                            })
-                        }
-                    })
-                    .catch(error => {
-                        console.log(error);
-                    });
+                this.geocodePosition(position.coords.latitude, position.coords.longitude)
 
                 this.setState({
                     latitude: position.coords.latitude,
@@ -108,11 +83,34 @@ export default class Add extends Component {
             })
     }
 
+    renderMarker() {
+        if(this.state.latitude && this.state.longitude) {
+            return (
+                <Marker
+                    coordinate={{
+                        latitude: this.state.latitude,
+                        longitude: this.state.longitude
+                    }}/>
+            )
+        }
+    }
+
     render() {
         if(!this.state.latitude && !this.state.longitude) {
             return <View>
                         <Text>Fetching location..</Text>
                    </View>
+        } 
+
+        let imgUpload;
+        if (this.state.image_uri) {
+            imgUpload = <Image
+                style={{width: '100%', height: 250}}
+                source={{uri: 
+                    this.state.image_uri}}
+                resizeMode="contain" 
+                resizeMethod="resize"
+                />
         }
 
         return (
@@ -127,71 +125,138 @@ export default class Add extends Component {
                         longitude: this.state.longitude,
                         latitudeDelta: 0.0020,
                         longitudeDelta: 0.0020,
-                    }}>
-                        <MapView.Marker
-                            coordinate={{
-                                latitude: this.state.latitude,
-                                longitude: this.state.longitude
-                            }}>
-                        </MapView.Marker>
+                    }}
+                    onUserLocationChange={this.handleLocationChange.bind(this)}
+                    showsUserLocation
+                    showsTraffic
+                    followsUserLocation>
+                         
+                    {this.renderMarker()}
+
                     </MapView>
                 </View>
                 <Container>
-                    <Form>
-                        <Item stackedLabel>
-                            <Label>Report</Label>
-                            <Textarea 
-                                style={styles.multiline}
-                                multiline= {true}
-                                numberOfLines = {5}
-                                onChangeText={(report) => this.setState({report})}
-                                value={this.state.report}
-                            />
-                        </Item>
-                        <Item>
-                            <Label>Upload Image</Label>
-                            <Input disabled />
-                            <Icon active name='camera' onPress={this.uploadImage.bind(this)} />
+                    <Content>
+                        <Form>
+                            <Item stackedLabel>
+                                <Label>Report</Label>
+                                <Textarea 
+                                    style={styles.multiline}
+                                    multiline= {true}
+                                    numberOfLines = {5}
+                                    onChangeText={(report) => this.setState({report})}
+                                    value={this.state.report}
+                                />
+                            </Item>
+                            <Item>
+                                <Label>Upload Image</Label>
+                                <Input disabled />
+                                <Icon active name='camera' onPress={this.uploadImage.bind(this)} />
+                            </Item>
                             <View style={styles.imageWrapper}>
-
-                            </View> 
-                        </Item>
-  
-                        <Button rounded danger block onPress={this.handleAddIncident.bind(this)}> 
-                            <Text>Send</Text>    
-                        </Button>
-                    </Form>     
+                                {imgUpload}
+                            </View>
+                            <View style={styles.form}>     
+                                <Button block rounded danger onPress={this.handleAddIncident.bind(this)}> 
+                                    <Text>Send</Text>    
+                                </Button>
+                            </View>
+                        </Form>
+                    </Content>     
                 </Container>
             </KeyboardAvoidingView>
         );
     }
 
     handleAddIncident() {
-        let query = ReportService.add({
-            location: ReportSerivce.geopoint(this.state.latitude, this.state.longitude),
-            report: this.state.report,
-            address: this.state.address,
-            sender: CIVILIAN,
-        });
-
-        if(this.state.user && this.state.user.isEnforcer) {
-            query = IncidentService.add({
+        StorageService.uploadIncident(this.state.image_uri)
+        .then(uri => {
+            console.log("SEND INCIDENT");
+            let data = {
                 location: ReportSerivce.geopoint(this.state.latitude, this.state.longitude),
                 report: this.state.report,
-                sender: TRAFFIC_ENFORCER,
-            });
-        }
+                address: this.state.address,
+                sender: (this.state.user && this.state.user.isEnforcer) ? TRAFFIC_ENFORCER : CIVILIAN,
+                imageUri: uri.downloadURL
+            }
+    
+            let query;
+    
+            // if user is an enforcer
+            if(this.state.user && this.state.user.isEnforcer) {
+                query = IncidentService.add(data);
+            } else {
+                query = ReportService.add(data);
+            }
 
-        query.then(() => {
-            console.log('success');
+            return query
+        })
+        .then(() => {
+            console.log('SUCCESS');
             this.props.navigation.pop();
         }).catch(error => {
             console.log(error.message)
         });
+
+    }
+
+    handleLocationChange(event) {
+        console.log("LOCATION CHANGED",event.nativeEvent.coordinate);
+        let myLocation = event.nativeEvent.coordinate;
+        if(myLocation.latitude && myLocation.longitude) {
+            this.setState({
+                latitude: myLocation.latitude,
+                longitude: myLocation.longitude
+            });
+
+            this.geocodePosition(myLocation.latitude, myLocation.longitude)
+        }
+    }
+
+    geocodePosition(lat, lng) {
+        let loc = {
+            lat: lat,
+            lng: lng
+        }
+
+        // Now let's geocode the given current position to get the formatted address
+        Geocoder.geocodePosition(loc)
+        .then(response => {
+            console.log("REVERSE GEOCODE",response);
+            if(response) {
+                let data = response[0];
+
+                this.setState({
+                    address: data.formattedAddress
+                })
+            }
+        })
+        .catch(error => {
+            console.log(error);
+        });
     }
 
     uploadImage() {
+        ImagePicker.showImagePicker(IMAGE_PICKER_OPTIONS, (response) => {
+            console.log('Response = ', response);
+          
+            if (response.didCancel) {
+              console.log('User cancelled image picker');
+            } else if (response.error) {
+              console.log('ImagePicker Error: ', response.error);
+            }  else {
+              const source = { uri: response.uri };
+          
+              // You can also display the image using data:
+              // const source = { uri: 'data:image/jpeg;base64,' + response.data };
+              console.log(source);
 
+              this.setState({
+                image_uri: source.uri,
+              });
+
+            }
+        });
     }
 }
 
@@ -203,7 +268,7 @@ const styles = StyleSheet.create({
     container: { 
         height: 180
     },
-    formContainer: {
+    form: {
         margin: 10
     },
     multiline: {
