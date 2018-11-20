@@ -126,7 +126,7 @@ export default class Add extends Component {
                         latitudeDelta: 0.0020,
                         longitudeDelta: 0.0020,
                     }}
-                    onUserLocationChange={this.handleLocationChange.bind(this)}
+                    // onUserLocationChange={this.handleLocationChange.bind(this)}
                     showsUserLocation
                     showsTraffic
                     followsUserLocation>
@@ -177,7 +177,8 @@ export default class Add extends Component {
                 report: this.state.report,
                 address: this.state.address,
                 sender: (this.state.user && this.state.user.isEnforcer) ? TRAFFIC_ENFORCER : CIVILIAN,
-                imageUri: uri.downloadURL
+                imageUri: uri.downloadURL,
+                date: new Date(),
             }
     
             let query;
@@ -200,18 +201,18 @@ export default class Add extends Component {
 
     }
 
-    handleLocationChange(event) {
-        console.log("LOCATION CHANGED",event.nativeEvent.coordinate);
-        let myLocation = event.nativeEvent.coordinate;
-        if(myLocation.latitude && myLocation.longitude) {
-            this.setState({
-                latitude: myLocation.latitude,
-                longitude: myLocation.longitude
-            });
+    // handleLocationChange(event) {
+    //     console.log("LOCATION CHANGED",event.nativeEvent.coordinate);
+    //     let myLocation = event.nativeEvent.coordinate;
+    //     if(myLocation.latitude && myLocation.longitude) {
+    //         this.setState({
+    //             latitude: myLocation.latitude,
+    //             longitude: myLocation.longitude
+    //         });
 
-            this.geocodePosition(myLocation.latitude, myLocation.longitude)
-        }
-    }
+    //         this.geocodePosition(myLocation.latitude, myLocation.longitude)
+    //     }
+    // }
 
     geocodePosition(lat, lng) {
         let loc = {

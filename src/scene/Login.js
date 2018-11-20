@@ -27,8 +27,7 @@ export default class LoginScene extends Component {
 
     componentDidMount() {
         this.requestLocationPermission();
-        console.log("COMPONENT DID MOUNT");
-        console.log(LocalStorage.getUserDetails());
+
         LocalStorage.getUserDetails()
             .then(user => {
                 console.log(user);

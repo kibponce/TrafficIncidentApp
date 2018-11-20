@@ -21,7 +21,16 @@ class ReportService {
     }
 
     onSnapshot(collectionUpdate) {
-        this.unsubscribe = this.ref.onSnapshot(collectionUpdate);    
+        var start = new Date();
+        start.setHours(0,0,0,0);
+        var end = new Date();
+        end.setHours(23,59,59,999);
+
+        
+        this.unsubscribe = this.ref
+                                .where('date', '>=', start)
+                                .where('date', '<=', end)
+                                .onSnapshot(collectionUpdate);    
     }
 
     unsubscribe() {

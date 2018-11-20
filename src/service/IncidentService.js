@@ -1,4 +1,5 @@
 import firebase from 'react-native-firebase';
+import moment from 'moment';
 
 class IncidentService {
     constructor() {
@@ -20,11 +21,19 @@ class IncidentService {
         return this.ref.get();
     }
 
-    onSnapshot(collectionUpdate) {
-        this.unsubscribe = this.ref.onSnapshot(collectionUpdate);    
+    onIncedentsSnapshot(collectionUpdate) {
+        var start = new Date();
+        start.setHours(0,0,0,0);
+        var end = new Date();
+        end.setHours(23,59,59,999);
+
+        this.unsubscribe = this.ref
+                                .where('date', '>=', start)
+                                .where('date', '<=', end)
+                                .onSnapshot(collectionUpdate);    
     }
 
-    unsubscribe() {
+    unsubscribeIncidents() {
         this.unsubscribe();
     }
 }

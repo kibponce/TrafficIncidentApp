@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { StyleSheet } from 'react-native';
-import { Container, Content, List, ListItem, Text,  Left, Right, Body, Icon } from 'native-base';
+import { Image } from 'react-native';
+import { Container, Content, List, ListItem, Text,  Left, Right, Body, Icon, Thumbnail } from 'native-base';
 
 import LocalStorage from '../../service/LocalStorage';
 import ReportService from '../../service/ReportService';
@@ -24,6 +24,7 @@ export default class ReportScene extends Component {
     }
 
     componentWillMount() {
+        console.log("COMPONENT WILL MOUNT - REPORT")
         this.getCurrentLocation();
      }
 
@@ -67,7 +68,7 @@ export default class ReportScene extends Component {
                     let inCircle = geolib.isPointInCircle(
                         {latitude: report.location.latitude, longitude: report.location.longitude},
                         {latitude: this.state.latitude, longitude: this.state.longitude},
-                        200
+                        300
                     );
     
                     if(inCircle) {
@@ -89,7 +90,10 @@ export default class ReportScene extends Component {
               <Content>
                 <List dataArray={items}
                   renderRow={(item) =>
-                    <ListItem thumbnail>
+                    <ListItem thumbnail onPress={this.viewReport.bind(this, item)} >
+                        <Left>
+                            <Thumbnail square source={{ uri: item.image_uri }} />
+                        </Left>
                         <Body>
                             <Text>{item.report}</Text>
                             <Text note numberOfLines={2}>{item.address}</Text>
@@ -113,12 +117,17 @@ export default class ReportScene extends Component {
                 id: doc.id,
                 location: doc.data().location,
                 report: doc.data().report,
-                address: doc.data().address
+                address: doc.data().address,
+                image_uri: doc.data().imageUri
             });
         });
 
         this.setState({
             reports: reports
         });
+    }
+
+    viewReport(item) {
+        this.props.navigation.push("ViewReportScene", {item});
     }
 }

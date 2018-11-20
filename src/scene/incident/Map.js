@@ -33,62 +33,79 @@ export default class Map extends React.Component {
             longitude: null,
             enforcers: [],
             incidents: [],
-            isDebug: false
+            isDebug: false,
+            error: null,
         }
-
-        this.mapRef = null;
     }
 
     componentWillMount() {
-        
+        IncidentService.onIncedentsSnapshot(this.onIncidentsCollectionUpdate);
+        UserService.onEnforcersSnapshot(this.onEnforcersCollectionUpdate)
     }
 
     componentDidMount() {
-        UserService.onEnforcersSnapshot(this.onEnforcersCollectionUpdate)
-        IncidentService.onSnapshot(this.onIncidentsCollectionUpdate);
-        
+        console.log("MAP DID UNMOUNT");
+        this.watchPosition();
         LocalStorage.getUserDetails()
             .then(user => {
                 console.log("LOCAL STORAGE DATA", user);
                 this.setState({user: JSON.parse(user)});
-
-                this.getCurrentLocation();
             })
             .catch(error => {
                 console.log(error);
             });
-
-        
     }
 
     componentWillUnmount() {
-        UserService.unsubscribeEnforcers();;
-        IncidentService.unsubscribe();
+        console.log("MAP WILL UNMOUNT");
+        UserService.unsubscribeEnforcers();
+        IncidentService.unsubscribeIncidents();
+
+        navigator.geolocation.clearWatch(this.watchId);
     }
 
-    getCurrentLocation() {
-        
-        // Get current location of the device
-        navigator.geolocation.getCurrentPosition(
+    watchPosition() {
+        this.watchId = navigator.geolocation.watchPosition(
             (position) => {
-                console.log("position", position);
                 this.setState({
                     latitude: position.coords.latitude,
-                    longitude: position.coords.longitude
+                    longitude: position.coords.longitude,
                 });
+
+                this.updateLocation();
             },
-            error => {
+            (error) => {
                 Alert.alert(
                     error.message,
                     'Please enable the device location'
                 )
-                console.log(error);
-            }
-        );
+            },
+            { timeout: 20000, maximumAge: 1000, distanceFilter: 10 },
+        ); 
+    }
+
+    updateLocation() {
+        // UPDATE MY LOCATION
+        UserService.updateLocation(this.state.user.id, {
+            ...this.state.user,
+            location : UserService.geopoint(this.state.latitude, this.state.longitude)
+        });
+    }
+
+    logoutLocation() {
+        // UPDATE MY LOCATION
+        UserService.updateLocation(this.state.user.id, {
+            ...this.state.user,
+            location : null
+        });
     }
 
     // display all incidents marker
     renderIncidentsMarker() {
+        if(this.state.incidents.length <= 0) {
+            return
+        }
+
         const incidentsMarkers = this.state.incidents.map(report => {
             return (
                 <Marker
@@ -101,7 +118,6 @@ export default class Map extends React.Component {
             )
         });
 
-        console.log("INCIDENTS", incidentsMarkers);
         return incidentsMarkers;
     }
     
@@ -109,7 +125,6 @@ export default class Map extends React.Component {
     renderEnforcersMarker() {
         const enforcersMarker = this.state.enforcers.map(enforcer => {
             if(enforcer.location) {
-                 
                 return (
                     <Marker
                     key={enforcer.id}
@@ -129,11 +144,6 @@ export default class Map extends React.Component {
     renderImEnforcerMarker() {
         if(this.state.user && this.state.user.isEnforcer && this.state.latitude && this.state.longitude) {
             console.log("IM ENFORCERS",this.state.user);
-            // UPDATE MY LOCATION
-            UserService.updateLocation(this.state.user.id, {
-                ...this.state.user,
-                location : UserService.geopoint(this.state.latitude, this.state.longitude)
-            });
 
             return (
                 <Marker
@@ -146,12 +156,48 @@ export default class Map extends React.Component {
         } 
     }
 
-    render() {
-        if(!this.state.latitude && !this.state.longitude && !this.state.user) {
-            return <Spinner color='green' />;
-            
-        }
+    renderMap() {
+        if(this.state.latitude && this.state.longitude) {
+            return (
+                <MapView
+                    provider={PROVIDER_GOOGLE}
+                    style={styles.map}
+                    customMapStyle={mapStyle}
+                    initialRegion={{
+                        latitude: this.state.latitude,
+                        longitude: this.state.longitude,
+                        latitudeDelta: 0.0955,
+                        longitudeDelta: 0.0421,
+                    }}
+                    showsUserLocation
+                    showsTraffic
+                    followsUserLocation
+                    >
+                    {/* RENDER ENFORCERS */}
+                    {this.renderEnforcersMarker()}
+    
+                    {/* IF USER IS ENFORCER RENDER MY MARKER */}
+                    {this.renderImEnforcerMarker()}
 
+                    {/* RENDER INCIDENTS */}
+                    {this.renderIncidentsMarker()}
+    
+                    {/* <Circle
+                        center={{
+                            latitude: this.state.latitude,
+                            longitude: this.state.longitude
+                        }}
+                        radius={300}
+                        fillColor="red"
+                        fillOpacity="0.5"
+                        zIndex={2}
+                    /> */}
+                </MapView>
+            );
+        }
+    }
+
+    render() {
         let user = this.state.user;
         let reportButton, debugCircle;
         if(user && user.isEnforcer) {
@@ -160,55 +206,28 @@ export default class Map extends React.Component {
                             </Button>
         }
 
-        return (
-            <View style={styles.container}>
-                <View style={styles.logoutButtonArea}>
-                    <Button style={styles.logoutButton} transparent onPress={this.handleLogout.bind(this)}>
-                        <Ionicons name="md-log-out" size={35} color="black" />
-                    </Button>
+        if(this.state.latitude && this.state.longitude && this.state.user) {
+            return (
+                <View style={styles.container}>
+                    <View style={styles.logoutButtonArea}>
+                        <Button style={styles.logoutButton} transparent onPress={this.handleLogout.bind(this)}>
+                            <Ionicons name="md-log-out" size={35} color="black" />
+                        </Button>
+                    </View>
+                    <View style={styles.addButtonArea}>
+                        {reportButton}
+                        <Button style={styles.button} rounded danger onPress={this.handleAddIncident.bind(this)}>
+                            <MaterialIcons name="add-alert" size={35} color="white" />
+                        </Button>
+                    </View>
+                    { this.renderMap() }
                 </View>
-                <View style={styles.addButtonArea}>
-                    {reportButton}
-                    <Button style={styles.button} rounded danger onPress={this.handleAddIncident.bind(this)}>
-                        <MaterialIcons name="add-alert" size={35} color="white" />
-                    </Button>
-                </View>
-                <MapView
-                provider={PROVIDER_GOOGLE}
-                style={styles.map}
-                customMapStyle={mapStyle}
-                initialRegion={{
-                    latitude: 8.48222,
-                    longitude: 124.64722,
-                    latitudeDelta: 0.0955,
-                    longitudeDelta: 0.0421,
-                }}
-                onUserLocationChange={this.handleLocationChange.bind(this)}
-                showsUserLocation
-                showsTraffic
-                followsUserLocation
-                >
-                    {/* RENDER ENFORCERS */}
-                    {this.renderEnforcersMarker()}
-
-                    {/* RENDER INCIDENTS */}
-                    {this.renderIncidentsMarker()}
-
-                    {/* IF USER IS ENFORCER RENDER MY MARKER */}
-                    {this.renderImEnforcerMarker()}
-
-                    {/* <Circle
-                        center={{
-                            latitude: this.state.latitude,
-                            longitude: this.state.longitude
-                        }}
-                        radius={200}
-                        fillColor="red"
-                        zIndex={2}
-                    /> */}
-                </MapView>
-            </View>
-        );
+            );
+        } else {
+            return (
+                <Spinner color='green' />
+            );
+        } 
     }
 
     handleAddIncident() {
@@ -227,6 +246,7 @@ export default class Map extends React.Component {
                 {text: 'No', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
                 {text: 'Yes', onPress: () => {
                     try {
+                        this.logoutLocation();
                         firebase.auth().signOut()
                             .then(() => {
                                 this.props.navigation.navigate('Login');
@@ -241,17 +261,6 @@ export default class Map extends React.Component {
                 }},
             ]
         )
-    }
-
-    handleLocationChange(event) {
-        console.log("LOCATION CHANGED",event.nativeEvent.coordinate);
-        let myLocation = event.nativeEvent.coordinate;
-        if(myLocation.latitude && myLocation.longitude) {
-            this.setState({
-                latitude: myLocation.latitude,
-                longitude: myLocation.longitude
-            })
-        }
     }
 
     onEnforcersCollectionUpdate = (querySnapshot) => {
