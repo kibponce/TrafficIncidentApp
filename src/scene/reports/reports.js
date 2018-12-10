@@ -92,7 +92,7 @@ export default class ReportScene extends Component {
                   renderRow={(item) =>
                     <ListItem thumbnail onPress={this.viewReport.bind(this, item)} >
                         <Left>
-                            <Thumbnail square source={{ uri: item.image_uri }} />
+                            <Thumbnail square source={{ uri: item.imageUri }} />
                         </Left>
                         <Body>
                             <Text>{item.report}</Text>
@@ -118,7 +118,7 @@ export default class ReportScene extends Component {
                 location: doc.data().location,
                 report: doc.data().report,
                 address: doc.data().address,
-                image_uri: doc.data().imageUri
+                imageUri: doc.data().imageUri
             });
         });
 
