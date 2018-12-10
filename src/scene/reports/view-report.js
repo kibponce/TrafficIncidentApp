@@ -9,6 +9,7 @@ export default class ViewReport extends Component {
 
     render() {
         let item = this.props.navigation.state.params.item;
+        console.log('ITEM', item)
         return (
             <Container>
                 <Content style={styles.content}>
@@ -22,7 +23,8 @@ export default class ViewReport extends Component {
                             </Left>
                         </CardItem>
                         <CardItem cardBody>
-                            <Image source={{uri: item.image_uri}} 
+                            <Image source={{uri: item.imageUri}} 
+                                    defaultSource={{uri: item.imageUri}} 
                                     style={{height: 250, width: null, flex: 1}}
                                     resizeMode="contain" 
                                     resizeMethod="resize"/>

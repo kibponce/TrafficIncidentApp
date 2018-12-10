@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, PermissionsAndroid, Alert } from 'react-native';
+import { StyleSheet, View, PermissionsAndroid, Alert, Image } from 'react-native';
 import MapView, { PROVIDER_GOOGLE, Circle, Marker} from 'react-native-maps';
 import firebase from 'react-native-firebase';
 
@@ -14,6 +14,7 @@ import LocalStorage from '../../service/LocalStorage';
 import ReportService from '../../service/ReportService';
 import IncidentService from '../../service/IncidentService';
 import UserService from '../../service/UserService';
+import Callout from './Callout';
 
 const I_ENFORCER_MARKER = "#00FF00";
 const ENFORCERS_MARKER = "#0000FF";
@@ -34,17 +35,18 @@ export default class Map extends React.Component {
             enforcers: [],
             incidents: [],
             isDebug: false,
-            error: null,
+            error: null
         }
     }
 
     componentWillMount() {
+        console.log("MAP WILL MOUNT");
         IncidentService.onIncedentsSnapshot(this.onIncidentsCollectionUpdate);
         UserService.onEnforcersSnapshot(this.onEnforcersCollectionUpdate)
     }
 
     componentDidMount() {
-        console.log("MAP DID UNMOUNT");
+        console.log("MAP DID MOUNT");
         this.watchPosition();
         LocalStorage.getUserDetails()
             .then(user => {
@@ -65,7 +67,7 @@ export default class Map extends React.Component {
     }
 
     watchPosition() {
-        this.watchId = navigator.geolocation.watchPosition(
+        this.watchId = navigator.geolocation.watchPosition( 
             (position) => {
                 this.setState({
                     latitude: position.coords.latitude,
@@ -86,18 +88,22 @@ export default class Map extends React.Component {
 
     updateLocation() {
         // UPDATE MY LOCATION
-        UserService.updateLocation(this.state.user.id, {
-            ...this.state.user,
-            location : UserService.geopoint(this.state.latitude, this.state.longitude)
-        });
+        if(this.state.user) {
+            UserService.updateLocation(this.state.user.id, {
+                ...this.state.user,
+                location : UserService.geopoint(this.state.latitude, this.state.longitude)
+            });
+        }  
     }
 
     logoutLocation() {
         // UPDATE MY LOCATION
-        UserService.updateLocation(this.state.user.id, {
-            ...this.state.user,
-            location : null
-        });
+        if(this.state.user) {
+            UserService.updateLocation(this.state.user.id, {
+                ...this.state.user,
+                location : null
+            });
+        }
     }
 
     // display all incidents marker
@@ -107,14 +113,23 @@ export default class Map extends React.Component {
         }
 
         const incidentsMarkers = this.state.incidents.map(report => {
+            console.log(report.imageUri);
             return (
-                <Marker
+                <MapView.Marker
                 key={report.id}
-                pinColor={INCEDENTS_MARKER}
                 coordinate={{
                     latitude: report.location.latitude,
                     longitude: report.location.longitude
-                }}/> 
+                }}
+                onPress={this.viewIncident.bind(this, report)}> 
+                    <View style={styles.markerView}>
+                        <Image source={{uri: report.imageUri}} 
+                                defaultSource={{uri: report.imageUri}} 
+                                style={styles.markerImage}
+                                resizeMode="contain" 
+                                resizeMethod="resize" />
+                    </View>
+                </MapView.Marker>
             )
         });
 
@@ -198,21 +213,26 @@ export default class Map extends React.Component {
     }
 
     render() {
+        console.log("RENDER")
         let user = this.state.user;
-        let reportButton, debugCircle;
+        let reportButton, debugCircle, logoutButton;
         if(user && user.isEnforcer) {
             reportButton = <Button style={styles.button} rounded danger onPress={this.handleReports.bind(this)}>
                                 <MaterialIcons name="report" size={35} color="white" />
                             </Button>
         }
 
-        if(this.state.latitude && this.state.longitude && this.state.user) {
+        if(user) {
+            logoutButton = <Button style={styles.logoutButton} transparent onPress={this.handleLogout.bind(this)}>
+                                <Ionicons name="md-log-out" size={35} color="black" />
+                            </Button>
+        }
+
+        if(this.state.latitude && this.state.longitude) {
             return (
                 <View style={styles.container}>
                     <View style={styles.logoutButtonArea}>
-                        <Button style={styles.logoutButton} transparent onPress={this.handleLogout.bind(this)}>
-                            <Ionicons name="md-log-out" size={35} color="black" />
-                        </Button>
+                        {logoutButton}
                     </View>
                     <View style={styles.addButtonArea}>
                         {reportButton}
@@ -231,11 +251,17 @@ export default class Map extends React.Component {
     }
 
     handleAddIncident() {
-        this.props.navigation.navigate('AddIncidentScene');
+        //If there is a logged in user navigate to the adding of incident, else login first
+        if(this.state.user) {
+            this.props.navigation.push('AddIncidentScene');
+        } else {
+            this.props.navigation.replace('Login');
+        }
+        
     }
 
     handleReports() {
-        this.props.navigation.navigate('ReportScene');
+        this.props.navigation.push('ReportScene');
     }
 
     handleLogout() {
@@ -249,7 +275,7 @@ export default class Map extends React.Component {
                         this.logoutLocation();
                         firebase.auth().signOut()
                             .then(() => {
-                                this.props.navigation.navigate('Login');
+                                this.props.navigation.replace('Login');
                                 LocalStorage.clearUserDetails();
                             })
                             .catch(error => {
@@ -291,13 +317,19 @@ export default class Map extends React.Component {
             incidents.push({
                 id: doc.id,
                 location: doc.data().location,
-                report: doc.data().report
+                report: doc.data().report,
+                imageUri: doc.data().imageUri,
+                address: doc.data().address
             });
         });
 
         this.setState({
             incidents: incidents
         });
+    }
+
+    viewIncident(item) {
+        this.props.navigation.push("ViewReportScene", {item});
     }
 }
 
@@ -333,6 +365,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexDirection: 'row',
     flex: 1
+  },
+  markerView: {
+    borderRadius: 4,
+    borderColor: '#FF0080',
+    backgroundColor: '#FF0080',
+    height: 36,
+    width: 36,
+    padding: 1
+  },
+  markerImage: {
+    height: 35, 
+    width: '100%'
+  },
+  calloutImage: {
+      width: 35,
+      height: 35,
   }
   
 });
