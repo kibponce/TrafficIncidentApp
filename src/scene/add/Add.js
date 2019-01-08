@@ -39,6 +39,12 @@ export default class Add extends Component {
             longitudeDelta: 0.0020, 
             report: "",
             address: "",
+            street: "",
+            streetNumber: "",
+            feature: "",
+            subAdminArea: "",
+            locality: "",
+            country: "",
             isSaveLoading: false,
             image_uri: null,
             
@@ -175,7 +181,13 @@ export default class Add extends Component {
             let data = {
                 location: ReportSerivce.geopoint(this.state.latitude, this.state.longitude),
                 report: this.state.report,
-                address: this.state.address,
+                address: this.formatAddress(),
+                streetNumber: this.state.streetNumber,
+                streetName: this.state.streetName,
+                feature: this.state.feature,
+                locality: this.state.locality,
+                subAdminArea: this.state.subAdminArea,
+                country: this.state.country,
                 sender: (this.state.user && this.state.user.isEnforcer) ? TRAFFIC_ENFORCER : CIVILIAN,
                 imageUri: uri.downloadURL,
                 date: new Date(),
@@ -226,15 +238,61 @@ export default class Add extends Component {
             console.log("REVERSE GEOCODE",response);
             if(response) {
                 let data = response[0];
+                let data2 = response;
 
+                data2.filter( data => {
+
+                    if(data.country) {
+                        this.setState({
+                            country: data.country,
+                        });
+                    }
+
+                    if(data.locality) {
+                        this.setState({
+                            locality: data.locality,
+                        });
+                    }
+
+                    if(data.streetNumber) {
+                        this.setState({
+                            streetNumber: data.streetNumber,
+                        });
+                    }
+
+                    if(data.streetName) {
+                        this.setState({
+                            streetName: data.streetName,
+                        });
+                    }
+                    
+
+                    if(data.feature && data.locality) {
+                        this.setState({
+                            feature: data.feature,
+                        });
+                    }
+
+                    if(data.subAdminArea) {
+                        this.setState({
+                            subAdminArea: data.subAdminArea,
+                        });
+                    }     
+                });
+                console.log(this.formatAddress())
                 this.setState({
-                    address: data.formattedAddress
-                })
+                    address: this.formatAddress(),
+                });
             }
         })
         .catch(error => {
             console.log(error);
         });
+    }
+
+    formatAddress() {
+        let {streetNumber, streetName, feature, locality, subAdminArea, country} = this.state;
+        return `${streetNumber} ${streetName} ${feature}, ${locality}, ${subAdminArea}, ${country}`;
     }
 
     uploadImage() {
