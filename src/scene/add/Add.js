@@ -267,7 +267,7 @@ export default class Add extends Component {
                     }
                     
 
-                    if(data.feature && data.locality) {
+                    if(data.feature && data.locality && !this.state.feature) {
                         this.setState({
                             feature: data.feature,
                         });

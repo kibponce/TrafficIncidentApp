@@ -41,6 +41,7 @@ export default class Map extends React.Component {
     }
 
     componentWillMount() {
+        console.log("MAP WILL MOUNT");
         IncidentService.onIncedentsSnapshot(this.onIncidentsCollectionUpdate);
         UserService.onEnforcersSnapshot(this.onEnforcersCollectionUpdate)
     }
@@ -220,7 +221,7 @@ export default class Map extends React.Component {
     }
 
     render() {
-        let user = this.state.user;
+        let {user, incidents}= this.state;
         let reportButton, debugCircle, logoutButton;
         if(user && user.isEnforcer) {
             reportButton = <Button style={styles.button} rounded danger onPress={this.handleReports.bind(this)}>
@@ -241,6 +242,9 @@ export default class Map extends React.Component {
                         {logoutButton}
                     </View>
                     <View style={styles.addButtonArea}>
+                        <Button style={styles.button} rounded danger onPress={this.handleIncidentReports.bind(this, incidents)}>
+                            <MaterialIcons name="equalizer" size={35} color="white" />
+                        </Button>
                         {reportButton}
                         <Button style={styles.button} rounded danger onPress={this.handleAddIncident.bind(this)}>
                             <MaterialIcons name="add-alert" size={35} color="white" />
@@ -263,6 +267,10 @@ export default class Map extends React.Component {
         } else {
             this.props.navigation.replace('Login');
         }
+    }
+
+    handleIncidentReports(incidents) {   
+        this.props.navigation.push('IncidentReportScene', {incidents});
     }
 
     handleReports() {
@@ -324,7 +332,13 @@ export default class Map extends React.Component {
                 location: doc.data().location,
                 report: doc.data().report,
                 imageUri: doc.data().imageUri,
-                address: doc.data().address
+                address: doc.data().address,
+                streetNumber: doc.data().streetNumber,
+                streetName: doc.data().streetName,
+                feature: doc.data().feature,
+                locality: doc.data().locality,
+                subAdminArea: doc.data().subAdminArea,
+                country: doc.data().country,
             });
         });
 
