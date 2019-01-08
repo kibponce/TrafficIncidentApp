@@ -17,7 +17,7 @@ const AppNagivationStack = createStackNavigator({
     ReportScene: ReportScene,
     ViewReportScene: ViewReportScene
 }, { 
-    initialRouteName : 'Login'
+    initialRouteName : 'IncidentScene'
 });
 
 export default AppNagivationStack;

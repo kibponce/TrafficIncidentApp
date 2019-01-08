@@ -24,6 +24,7 @@ class UserService {
     }
 
     onEnforcersSnapshot(collectionUpdate) {
+        if(this.unsubscribe) { this.unsubscribe(); }
         this.unsubscribeEnforcers = this.ref.where('isEnforcer', '==', true).onSnapshot(collectionUpdate);    
     }
 

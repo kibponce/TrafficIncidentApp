@@ -4,6 +4,7 @@ import { StyleSheet,
          View, PermissionsAndroid } from 'react-native';
 import { Container, Content, Form, Item, Input, Button, Label } from 'native-base';
 import firebase from 'react-native-firebase';
+import { NavigationActions } from 'react-navigation';
 
 import UserService from '../service/UserService';
 import LocalStorage from '../service/LocalStorage';
@@ -28,18 +29,18 @@ export default class LoginScene extends Component {
     componentDidMount() {
         this.requestLocationPermission();
 
-        LocalStorage.getUserDetails()
-            .then(user => {
-                console.log(user);
-                if(user == null) {
-                    return this.props.navigation.navigate('LoginScene');
-                } else {
-                    return this.props.navigation.navigate('IncidentScene');
-                }
-            })
-            .catch(error => {
-                console.log(error);
-            })
+        // LocalStorage.getUserDetails()
+        //     .then(user => {
+        //         console.log(user);
+        //         if(user == null) {
+        //             return this.props.navigation.navigate('LoginScene');
+        //         } else {
+        //             return this.props.navigation.navigate('IncidentScene');
+        //         }
+        //     })
+        //     .catch(error => {
+        //         console.log(error);
+        //     })
     }
         
     componentWillUnmount() {
@@ -99,6 +100,13 @@ export default class LoginScene extends Component {
                         <Button transparent block info onPress={this.registerScene.bind(this)}>
                             <Text style={styles.registerLink}>Sign up</Text>
                         </Button>
+
+                        <View style={styles.form}>
+                            <Button transparent block info onPress={this.backToMap.bind(this)}>
+                                <Text style={styles.registerLink}>Back to Map</Text>
+                            </Button>
+                        </View>
+
                     </View>
                 </Content>
             </Container>
@@ -142,7 +150,7 @@ export default class LoginScene extends Component {
                 .auth()
                 .signInAndRetrieveDataWithEmailAndPassword(email, password)
                 .then(() => {
-                    return this.props.navigation.navigate('IncidentScene');
+                    return this.props.navigation.replace('IncidentScene');
                 })
                 .catch(error => {
                     return Promise.reject(error);
@@ -156,8 +164,13 @@ export default class LoginScene extends Component {
     }
 
     registerScene() {
-        return this.props.navigation.navigate('Register');
+        return this.props.navigation.push('Register');
     }
+
+    backToMap() {
+        return this.props.navigation.replace('IncidentScene');
+    }
+
 }
 
 const styles = StyleSheet.create({
