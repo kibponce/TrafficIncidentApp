@@ -27,7 +27,7 @@ const IMAGE_PICKER_OPTIONS = {
 
 export default class Add extends Component {   
     static navigationOptions = {
-        title: 'Add'
+        title: 'Report an Incident'
     };
 
     constructor() {

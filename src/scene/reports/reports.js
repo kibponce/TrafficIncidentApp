@@ -9,7 +9,7 @@ import geolib from 'geolib';
 
 export default class ReportScene extends Component {
     static navigationOptions = {
-        title: 'Reports'
+        title: 'Civilian Crash Reports'
     };
 
     constructor(props) {
@@ -118,7 +118,7 @@ export default class ReportScene extends Component {
                 location: doc.data().location,
                 report: doc.data().report,
                 address: doc.data().address,
-                image_uri: doc.data().imageUri
+                imageUri: doc.data().imageUri
             });
         });
 
