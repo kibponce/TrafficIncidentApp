@@ -188,15 +188,16 @@ export default class Add extends Component {
                 locality: this.state.locality,
                 subAdminArea: this.state.subAdminArea,
                 country: this.state.country,
-                sender: (this.state.user && this.state.user.isEnforcer) ? TRAFFIC_ENFORCER : CIVILIAN,
+                sender: this.state.user.role,
                 imageUri: uri.downloadURL,
+                isSettled: false,
                 date: new Date(),
             }
     
             let query;
     
             // if user is an enforcer
-            if(this.state.user && this.state.user.isEnforcer) {
+            if(this.state.user && this.state.user.role === TRAFFIC_ENFORCER) {
                 query = IncidentService.add(data);
             } else {
                 query = ReportService.add(data);

@@ -9,6 +9,8 @@ import { Button, Text, Spinner } from 'native-base';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
+import { CIVILIAN, TRAFFIC_ENFORCER } from '../../helpers/SenderEnum';
+
 // Service
 import LocalStorage from '../../service/LocalStorage';
 import ReportService from '../../service/ReportService';
@@ -48,8 +50,21 @@ export default class Map extends React.Component {
 
     componentDidMount() {
         console.log("MAP DID MOUNT");
-        this.watchPosition();
-        LocalStorage.getUserDetails()
+        this.requestLocationPermission();
+    }
+
+    async requestLocationPermission() {
+        try {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+            {
+              'title': 'App Location Permission',
+              'message': 'App needs to access your location'
+            }
+          )
+          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            this.watchPosition();
+            LocalStorage.getUserDetails()
             .then(user => {
                 console.log("LOCAL STORAGE DATA", user);
                 this.setState({user: JSON.parse(user)});
@@ -57,6 +72,12 @@ export default class Map extends React.Component {
             .catch(error => {
                 console.log(error);
             });
+          } else {
+            console.log("Location permission denied")
+          }
+        } catch (err) {
+          console.warn(err)
+        }
     }
 
     componentWillUnmount() {
@@ -165,7 +186,7 @@ export default class Map extends React.Component {
 
     // display my marker for enforcer if user is an enforcer
     renderImEnforcerMarker() {
-        if(this.state.user && this.state.user.isEnforcer && this.state.latitude && this.state.longitude) {
+        if(this.state.user && this.state.user.role === TRAFFIC_ENFORCER && this.state.latitude && this.state.longitude) {
             console.log("IM ENFORCERS",this.state.user);
 
             return (
@@ -223,7 +244,8 @@ export default class Map extends React.Component {
     render() {
         let {user, incidents}= this.state;
         let reportButton, debugCircle, logoutButton;
-        if(user && user.isEnforcer) {
+
+        if(user && user.role === TRAFFIC_ENFORCER) {
             reportButton = <Button style={styles.button} rounded danger onPress={this.handleReports.bind(this)}>
                                 <MaterialIcons name="report" size={35} color="white" />
                             </Button>
@@ -314,6 +336,7 @@ export default class Map extends React.Component {
                 email: doc.data().email,
                 isConfirmed: doc.data().isConfirmed,
                 isEnforcer: doc.data().isEnforcer,
+                role: doc.data().role,
                 phoneNumber: doc.data().phoneNumber,
             });
         });
@@ -327,19 +350,22 @@ export default class Map extends React.Component {
         console.log('ON INCIDENTS UPDATE');
         let incidents = [];
         querySnapshot.forEach((doc) => {
-            incidents.push({
-                id: doc.id,
-                location: doc.data().location,
-                report: doc.data().report,
-                imageUri: doc.data().imageUri,
-                address: doc.data().address,
-                streetNumber: doc.data().streetNumber,
-                streetName: doc.data().streetName,
-                feature: doc.data().feature,
-                locality: doc.data().locality,
-                subAdminArea: doc.data().subAdminArea,
-                country: doc.data().country,
-            });
+            if(!doc.data().isSettled) {
+                incidents.push({
+                    id: doc.id,
+                    location: doc.data().location,
+                    report: doc.data().report,
+                    imageUri: doc.data().imageUri,
+                    address: doc.data().address,
+                    streetNumber: doc.data().streetNumber,
+                    streetName: doc.data().streetName,
+                    feature: doc.data().feature,
+                    locality: doc.data().locality,
+                    subAdminArea: doc.data().subAdminArea,
+                    country: doc.data().country,
+                    isSettled: doc.data().isSettled
+                });
+            }
         });
 
         this.setState({

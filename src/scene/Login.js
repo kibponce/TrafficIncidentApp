@@ -121,6 +121,7 @@ export default class LoginScene extends Component {
                 .then((snapshot) => {
                     if(snapshot.docs.length > 0) {
                         let data = { ...snapshot.docs[0].data(), id: snapshot.docs[0].id };
+                        console.log(data);
                         if(data.isConfirm) {
                            LocalStorage.setUserDetails(data);
                             return this.doAuth(email, password);

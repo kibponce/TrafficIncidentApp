@@ -36,6 +36,10 @@ class IncidentService {
     unsubscribeIncidents() {
         this.unsubscribe();
     }
+
+    settleIncidents(id, data) {
+        this.ref.doc(id).set(data);
+    }
 }
 
 export default incidentService = new IncidentService();
